@@ -1,5 +1,28 @@
 import torch
 from torch import nn
+from collections import defaultdict
+from itertools import permutations, product
+
+def create_pairs(classes, output):
+    mapping = defaultdict(list)
+    for cls, output in zip(classes, output):
+        mapping[int(cls)].append(output)
+    
+    avail_classes = list(mapping.keys())
+    
+    all_pairs = []
+    for i in range(len(avail_classes)):
+        positive_anchor_pair = list(permutations(mapping[avail_classes[i]], 2))
+        positive_anchor_pair = [list(item) for item in positive_anchor_pair]
+        for j in range(len(avail_classes)):
+            if i != j:
+                res = list(product(positive_anchor_pair, mapping[avail_classes[j]]))
+                for x, y in res:
+                    copy = x.copy()
+                    copy.append(y)
+                    all_pairs.append(copy)
+                    
+    return all_pairs
 
 class Block(nn.Module):
     def __init__(self, in_channel, out_channel, identity_downsample=None, stride=1):
