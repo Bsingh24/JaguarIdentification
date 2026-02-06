@@ -24,6 +24,23 @@ def create_pairs(classes, output):
                     
     return all_pairs
 
+
+def create_tensors(pairs):
+    anchor_embedding = []
+    positive_embedding = []
+    negative_embedding = []
+    for anchor, positive, negative in pairs:
+        anchor_embedding.append(anchor)
+        positive_embedding.append(positive)
+        negative_embedding.append(negative)
+    
+    anchor_tensor = torch.stack(anchor_embedding)
+    positive_tensor = torch.stack(positive_embedding)
+    negative_tensor = torch.stack(negative_embedding)
+
+    return anchor_tensor, positive_tensor, negative_tensor
+
+
 class Block(nn.Module):
     def __init__(self, in_channel, out_channel, identity_downsample=None, stride=1):
         super().__init__()
@@ -73,7 +90,7 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, layers[3], out_channels=512, stride=2)        
 
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
-        self.output = nn.Linear(512*4, 512)
+        self.output = nn.Linear(512*4, 256)
 
     def forward(self, x):
         x = self.conv1(x)
